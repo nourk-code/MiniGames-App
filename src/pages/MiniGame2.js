@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { pictures } from "../utils/pictures";
-import Orientation from "react-native-orientation-locker";
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Score from "./Score";
 
 const Minigame2 = ({ navigation }) => {
@@ -23,14 +23,16 @@ const Minigame2 = ({ navigation }) => {
     const [result, setResult] = useState(null);
 
     useEffect(() => {
-        Orientation.lockToLandscape();
+        // Lock the screen orientation to landscape
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
         setStartTime(Date.now());
+    
         return () => {
-            Orientation.unlockAllOrientations();
+            // Unlock all orientations when the component unmounts
+            ScreenOrientation.unlockAsync();
         };
     }, []);
 
-    // console.log(mainImageShape)
     const rightPress = () => {
         if (!isAnswerSubmitted) {
             setIsAnswerSubmitted(true);
@@ -140,8 +142,6 @@ const Minigame2 = ({ navigation }) => {
                             </View>
                         </TouchableOpacity>
                     </View>
-                    {/* <Text>{score}</Text>
-                <Text>{turns}</Text> */}
                 </View>
             }
             {

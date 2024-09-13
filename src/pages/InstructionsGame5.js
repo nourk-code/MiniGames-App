@@ -1,15 +1,18 @@
 // pages/InstructionsGame5.js
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect } from "react";
-import Orientation from "react-native-orientation-locker";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 const InstructionsGame5 = ({ navigation, url, text }) => {
     useEffect(() => {
-        Orientation.lockToLandscape();
+        // Lock the screen orientation to landscape
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    
         return () => {
-            Orientation.unlockAllOrientations();
+          // Unlock all orientations when the component unmounts
+          ScreenOrientation.unlockAsync();
         };
-    }, []);
+      }, []);
 
     return (
         <View style={styles.container}>

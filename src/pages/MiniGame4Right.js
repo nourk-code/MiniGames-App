@@ -1,13 +1,10 @@
-//pages/ MiniGame4Right.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Score from './Score';
-import ScoreMiniGame4 from './ScoreMiniGame4';
 
 const MiniGame4Right = ({ navigation }) => {
   const [progress] = useState(new Animated.Value(1));
-  const [showText, setShowText] = useState(false);
   const [showOneBall, setShowOneBall] = useState(0);
   const [score, setScore] = useState(0);
   const [touchable1Pressed, setTouchable1Pressed] = useState(false);
@@ -17,16 +14,14 @@ const MiniGame4Right = ({ navigation }) => {
   useEffect(() => {
     const animation = Animated.timing(progress, {
       toValue: 0,
-      duration: 30000,
+      duration: 10000,
       useNativeDriver: false,
     });
 
     animation.start();
 
     const listenerId = progress.addListener(({ value }) => {
-      // console.log(value)
       if (value === 0) {
-        setShowText(true);
         setShowScore(true);
       }
     });
@@ -38,11 +33,14 @@ const MiniGame4Right = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    Orientation.lockToLandscape();
+    // Lock the screen orientation to landscape
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
     return () => {
-      Orientation.unlockAllOrientations();
+        // Unlock all orientations when the component unmounts
+        ScreenOrientation.unlockAsync();
     };
-  }, []);
+}, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -57,7 +55,7 @@ const MiniGame4Right = ({ navigation }) => {
   }, []);
 
   const handleCirclePress = () => {
-    if (showOneBall === 1 && (touchable1Pressed && touchable2Pressed)) {
+    if (showOneBall === 1 && touchable1Pressed && touchable2Pressed) {
       setScore(score + 50);
       setTimeout(() => {
         setTouchable1Pressed(false);
@@ -83,36 +81,31 @@ const MiniGame4Right = ({ navigation }) => {
             }]}
             />
           </View>
-          <Text>{showScore}</Text>
-          {showOneBall == 1 &&
+          {showOneBall === 1 &&
             <View style={styles.circleContainer}>
               <TouchableOpacity style={{ height: '100%', width: '45%' }}
-                onPress={() => { setTouchable1Pressed(true), handleCirclePress() }}
+                onPress={() => { setTouchable1Pressed(true); handleCirclePress(); }}
               >
               </TouchableOpacity>
-              <View style={styles.circle}>
-              </View>
+              <View style={styles.circle}></View>
               <TouchableOpacity style={{ height: '100%', width: '55%' }}
-                onPress={() => { setTouchable2Pressed(true), handleCirclePress() }}
-
+                onPress={() => { setTouchable2Pressed(true); handleCirclePress(); }}
               >
               </TouchableOpacity>
             </View>
           }
 
-          {showOneBall == 0 &&
+          {showOneBall === 0 &&
             <>
               <TouchableOpacity style={{
                 height: '100%', width: '100%', position: 'absolute', top: 0, left: 0,
               }}
-                onPress={() => { handleNotPress() }}
+                onPress={handleNotPress}
               >
               </TouchableOpacity>
               <View style={[styles.circleContainer, styles.gapTen]}>
-                <TouchableOpacity style={styles.circle} onPress={() => { handleNotPress() }}>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.circle} onPress={() => { handleNotPress() }}>
-                </TouchableOpacity>
+                <TouchableOpacity style={styles.circle} onPress={handleNotPress}></TouchableOpacity>
+                <TouchableOpacity style={styles.circle} onPress={handleNotPress}></TouchableOpacity>
               </View>
             </>
           }
@@ -123,7 +116,6 @@ const MiniGame4Right = ({ navigation }) => {
         <Score navigation={navigation} score={score} />
       }
     </>
-
   )
 }
 

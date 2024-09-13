@@ -1,7 +1,7 @@
 // pages/MiniGame3.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Score from './Score';
 
 const MiniGame3 = ({ navigation }) => {
@@ -12,15 +12,18 @@ const MiniGame3 = ({ navigation }) => {
   const [turns, setTurns] = useState(0);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [startTime, setStartTime] = useState(0);
-  // let turns=0
+
 
   useEffect(() => {
-    Orientation.lockToLandscape();
+    // Lock the screen orientation to landscape
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     setStartTime(Date.now());
+
     return () => {
-      Orientation.unlockAllOrientations();
+        // Unlock all orientations when the component unmounts
+        ScreenOrientation.unlockAsync();
     };
-  }, []);
+}, []);
 
   const submitAnswer = (index) => {
     if (!isAnswerSubmitted) {
@@ -48,9 +51,6 @@ const MiniGame3 = ({ navigation }) => {
       }, 1000);
 
       setTurns(turns + 1)
-      // if(turns==3){
-      //   navigation.navigate("score")
-      // }
 
     }
   }

@@ -1,7 +1,7 @@
 //pages/MiniGame4.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import Score from './Score';
 import ScoreMiniGame4 from './ScoreMiniGame4';
 
@@ -38,9 +38,12 @@ const MiniGame4 = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    Orientation.lockToLandscape();
+    // Lock the screen orientation to landscape
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
     return () => {
-      Orientation.unlockAllOrientations();
+      // Unlock all orientations when the component unmounts
+      ScreenOrientation.unlockAsync();
     };
   }, []);
 

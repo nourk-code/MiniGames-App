@@ -1,24 +1,26 @@
-// pages/ScoreMiniGame4.js
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from 'react';
 
-const ScoreMiniGame4 = ({ navigation, score }) => {
+const ScoreMiniGame4 = ({ navigation, score, isLeftHand }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.text}>Your Score is</Text>
             <Text style={[styles.text, { color: 'blue' }]}>{score}</Text>
-            <TouchableOpacity style={styles.button}
-                onPress={() => navigation.navigate("intruction",
-                    {
-                        text: "Tap the screen with two fingers when you see one dot. Do NOT tap the screen when you see two dots. Use right hand.",
-                        url: "game4Right"
-                    })
-                }
-            >
-                <Text style={styles.buttonText}>Home Page</Text>
-            </TouchableOpacity>
+            {isLeftHand ? (
+                <TouchableOpacity style={styles.button}
+                    onPress={() => navigation.navigate("intruction", {
+                        text: "Tap the screen with two fingers, one tap after another, when you see one dot. Do NOT tap the screen when you see two dots. Use right hand.",
+                        url: "game4Right" // Correct screen name
+                    })}
+                >
+                    <Text style={styles.buttonText}>Next</Text>
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
+                    <Text style={styles.buttonText}>Home Page</Text>
+                </TouchableOpacity>
+            )}
         </View>
-
     )
 }
 

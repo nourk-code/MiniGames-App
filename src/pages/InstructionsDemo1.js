@@ -1,13 +1,15 @@
 // pages/InstructionsDemo1.js
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import React, { useEffect } from "react";
-import Orientation from "react-native-orientation-locker";
-
+import * as ScreenOrientation from 'expo-screen-orientation';
 const InstructionsDemo1 = ({ navigation, url, text, listIndex }) => {
     useEffect(() => {
-        Orientation.lockToLandscape();
+        // Lock the screen orientation to landscape
+        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
         return () => {
-            Orientation.unlockAllOrientations();
+            // Unlock all orientations when the component unmounts
+            ScreenOrientation.unlockAsync();
         };
     }, []);
 
