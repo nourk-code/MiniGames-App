@@ -1,106 +1,13 @@
-
-// import React, { useEffect, useState, useRef } from "react";
-// import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// import Score from "./Score";
-
-// const MiniGame6 = ({ navigation }) => {
-//     const maxScore = 500; // Maximum score for perfect reaction
-//     const penalty = 20; // Penalty for early tap
-//     const [score, setScore] = useState(0);
-//     const [turn, setTurn] = useState(0);
-//     const [isReady, setIsReady] = useState(false);
-//     const [displayTime, setDisplayTime] = useState(null);
-//     const timer = useRef(null);
-//     const interval = useRef(null);
-
-//     useEffect(() => {
-//         startNewTurn();
-//         return () => {
-//             clearTimeout(timer.current);
-//             clearInterval(interval.current);
-//         };
-//     }, []);
-
-//     const startNewTurn = () => {
-//         const randomDelay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 and 5 seconds
-//         timer.current = setTimeout(() => {
-//             setIsReady(true);
-//             setDisplayTime(0);
-//             const startTime = Date.now();
-//             interval.current = setInterval(() => {
-//                 setDisplayTime(Date.now() - startTime);
-//             }, 1);
-//         }, randomDelay);
-//     };
-
-//     const handleTap = () => {
-//         if (isReady) {
-//             clearInterval(interval.current);
-//             const reaction = displayTime;
-//             setIsReady(false);
-//             const turnScore = Math.max(0, maxScore - reaction);
-//             setScore(prevScore => prevScore + turnScore);
-//             setTurn(turn + 1);
-//             if (turn < 4) {
-//                 setDisplayTime(null); // Reset display time
-//                 startNewTurn();
-//             }
-//         } else {
-//             setDisplayTime("Too early!");
-//             setScore(prevScore => prevScore - penalty); // Early tap penalty
-//         }
-//     };
-
-//     return (
-//         <>
-//             {turn < 5 && (
-//                 <TouchableOpacity style={styles.container} onPress={handleTap}>
-//                     <View style={styles.rect}>
-//                         <Text style={styles.text}>
-//                             {typeof displayTime === "number" ? displayTime : displayTime}
-//                         </Text>
-//                     </View>
-//                 </TouchableOpacity>
-//             )}
-
-//             {turn >= 5 && <Score navigation={navigation} score={score} />}
-//         </>
-//     );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         justifyContent: "center",
-//         alignItems: "center",
-//         backgroundColor: "black",
-//     },
-//     rect: {
-//         width: 200,
-//         height: 70,
-//         borderColor: "red",
-//         borderWidth: 2,
-//         justifyContent: "center",
-//         alignItems: "center",
-//     },
-//     text: {
-//         color: "white",
-//         fontSize: 30,
-//     },
-// });
-
-// export default MiniGame6;
-
-
 import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Score from "./Score";
+import ScoreMiniGame6 from "./ScoreMiniGame6"; // Import the Score component
 
 const MiniGame6 = ({ navigation }) => {
     const [score, setScore] = useState(0);
     const [turn, setTurn] = useState(0);
     const [isReady, setIsReady] = useState(false);
-    const [displayTime, setDisplayTime] = useState(null);
+    const [displayTime, setDisplayTime] = useState("Wait..."); // Ensure initial state is a string
+    const [reactionTimes, setReactionTimes] = useState([]); // Track all reaction times
     const timer = useRef(null);
     const interval = useRef(null);
 
@@ -116,7 +23,7 @@ const MiniGame6 = ({ navigation }) => {
         const randomDelay = Math.floor(Math.random() * 3000) + 2000; // Random delay between 2 and 5 seconds
         timer.current = setTimeout(() => {
             setIsReady(true);
-            setDisplayTime(0);
+            setDisplayTime(0); // Set displayTime to a number when ready
             const startTime = Date.now();
             interval.current = setInterval(() => {
                 setDisplayTime(Date.now() - startTime);
@@ -129,37 +36,46 @@ const MiniGame6 = ({ navigation }) => {
             clearInterval(interval.current);
             const reaction = displayTime;
             setIsReady(false);
-            let turnScore = 0;
-            if (reaction < 3000) {
-                turnScore = 50;
-            } else {
-                turnScore = 30;
+
+            // Log reaction time and calculate score
+            if (typeof reaction === "number") {
+                setReactionTimes((prevTimes) => [...prevTimes, reaction]);
             }
-            setScore(prevScore => prevScore + turnScore);
-            setTurn(turn + 1);
+            setTurn((prevTurn) => prevTurn + 1);
+
             if (turn < 4) {
-                setDisplayTime(null); // Reset display time
+                setDisplayTime("Wait...");
                 startNewTurn();
             }
         } else {
-            setDisplayTime("Too early!");
-            setScore(prevScore => prevScore - 20); // Early tap penalty
+            setDisplayTime("Too early!"); // Early tap penalty
+            setScore((prevScore) => prevScore - 20);
         }
     };
 
     return (
         <>
             {turn < 5 && (
-                <TouchableOpacity style={styles.container} onPress={handleTap}>
-                    <View style={styles.rect}>
-                        <Text style={styles.text}>
-                            {typeof displayTime === "number" ? displayTime : displayTime}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
+                <View style={styles.container}>
+                    <TouchableOpacity style={styles.touchable} onPress={handleTap}>
+                        <View style={styles.rect}>
+                            <Text style={styles.text}>
+                                {/* Safely render displayTime */}
+                                {typeof displayTime === "number"
+                                    ? `${displayTime.toFixed(0)} ms`
+                                    : displayTime}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
             )}
 
-            {turn >= 5 && <Score navigation={navigation} score={score} />}
+            {turn >= 5 && (
+                <ScoreMiniGame6
+                    navigation={navigation}
+                    reactionTimes={reactionTimes} // Pass reaction times to the Score component
+                />
+            )}
         </>
     );
 };
@@ -169,19 +85,33 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "white", // Changed background color to white
+        backgroundColor: "#f0f4f7", // Light background for a clean look
+        padding: 20, // Padding for better spacing
     },
-    rect: {
-        width: 200,
-        height: 70,
-        borderColor: "blue", // Changed border color to blue
-        borderWidth: 2,
+    touchable: {
         justifyContent: "center",
         alignItems: "center",
+        padding: 20,
+        backgroundColor: "#007bff", // Blue background for the button
+        borderRadius: 12, // Rounded corners for the button
+        elevation: 3, // Slight elevation for shadow effect
+    },
+    rect: {
+        width: 250,
+        height: 100,
+        borderColor: "#0047AB", // Blue border for a cohesive color theme
+        borderWidth: 2,
+        borderRadius: 20, // Softer rounded corners
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#ffffff", // White background for contrast with text
+        elevation: 5, // Elevation for shadow effect
+        padding: 10,
     },
     text: {
-        color: "blue", // Changed text color to blue
-        fontSize: 30,
+        color: "#0047AB", // Blue text color for consistency
+        fontSize: 35, // Larger font size for better visibility
+        fontWeight: "bold", // Bold font for emphasis
     },
 });
 

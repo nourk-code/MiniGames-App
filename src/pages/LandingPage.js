@@ -9,6 +9,7 @@ const LandingPage = ({ navigation }) => {
   const [width, setWidth] = useState(screenWidth * 0.96); // Initialize with 96% of screen width
   const [isModalVisible, setModalVisible] = useState(false); // State for modal visibility
   const [modalContent, setModalContent] = useState({}); // State for modal content
+  const [extraText, setExtraText] = useState(null); // State for extra text
 
   useEffect(() => {
     // Lock the screen orientation to landscape
@@ -30,14 +31,16 @@ const LandingPage = ({ navigation }) => {
   }, []);
 
   // Function to open the modal
-  const openModal = (text, url) => {
-    setModalContent({ text, url });
-    setModalVisible(true);
+  const openModal = (text, url, extraText = null) => {
+    setModalContent({ text, url }); // Set the content of the modal
+    setModalVisible(true); // Show the modal
+    setExtraText(extraText); // Set the extraText for specific games
   };
 
   // Function to close the modal
   const closeModal = () => {
     setModalVisible(false);
+    setExtraText(null); // Reset extraText when the modal is closed
   };
 
   const renderItem = ({ item }) => (
@@ -52,7 +55,10 @@ const LandingPage = ({ navigation }) => {
       </View>
       {/* Play Button */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => openModal(item.text, item.url)}>
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={() => openModal(item.text, item.url, item.extraText)} // Pass extraText to the modal
+        >
           <Text style={styles.buttonText}>Play</Text>
         </TouchableOpacity>
       </View>
@@ -87,19 +93,31 @@ const LandingPage = ({ navigation }) => {
       />
 
       {/* Instructions Modal */}
-      <Instructions visible={isModalVisible} navigation={navigation} route={{ params: modalContent }} onClose={closeModal} />
+      <Instructions 
+        visible={isModalVisible} 
+        navigation={navigation} 
+        route={{ params: modalContent }} 
+        onClose={closeModal} 
+        extraText={extraText} // Pass extraText prop to Instructions
+      />
     </View>
   );
 };
 
-// Game data configuration with icons
+// Modify your game data configuration for MiniGame6 to include the extra text when opened
 const games = [
   { label: "Visual Object Learning Task", text: "Remember each shape shown one at a time.", url: "demo1", icon: require('../../assets/images/icon1.png') },
   { label: "Abstract Matching", text: "Select the pair of shapes that matches the given shape.", url: "game2", icon: require('../../assets/images/icon1.png') },
   { label: "Digital Symbol Substitution Task", text: "Match the number to the symbol in the box.", url: "game3", icon: require('../../assets/images/icon1.png') },
   { label: "Go No Go Test", text: "Tap the screen correctly for different dots.", url: "game4", icon: require('../../assets/images/icon1.png') },
   { label: "Square Tapping Game", text: "Tap the squares as they appear on the screen.", url: "game5", icon: require('../../assets/images/icon1.png') },
-  { label: "Psychomotor Vigilance Test", text: "React quickly to numbers appearing on screen.", url: "game6", icon: require('../../assets/images/icon1.png') },
+  { 
+    label: "Psychomotor Vigilance Test", 
+    text: "React quickly to numbers appearing on screen.", 
+    url: "game6", 
+    icon: require('../../assets/images/icon1.png'),
+    extraText: "Watch the rectangle. When the numbers appear inside it, tap the button as quickly as you can. The numbers count in milliseconds. Try to get the fastest time without tapping the button too early." // Custom text for MiniGame6
+  },
 ];
 
 const styles = StyleSheet.create({

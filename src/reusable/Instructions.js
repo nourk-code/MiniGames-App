@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
 import React, { useEffect } from "react";
 import * as ScreenOrientation from 'expo-screen-orientation';
 
-const Instructions = ({ navigation, route, visible, onClose }) => {
+const Instructions = ({ navigation, route, visible, onClose, extraText }) => {
     const { text, url } = route.params;
 
     useEffect(() => {
@@ -29,6 +29,12 @@ const Instructions = ({ navigation, route, visible, onClose }) => {
                         Instructions
                     </Text>
                     <Text style={styles.instructionText}>{text}</Text>
+                    {/* Conditionally render extra text if provided */}
+                    {extraText && (
+                        <Text style={styles.extraText}>
+                            {extraText}
+                        </Text>
+                    )}
                     <View style={styles.buttonWrapper}>
                         <TouchableOpacity style={styles.nextButton} onPress={() => {
                             navigation.navigate(url);
@@ -70,6 +76,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 20,
         textAlign: 'center',
+    },
+    extraText: {
+        fontSize: 20,
+        color: "black", // Use grey for extra text
+        marginTop: 10,
+        textAlign: 'center',
+        fontStyle: 'italic', // Italic to differentiate extra text
     },
     buttonWrapper: {
         flexDirection: 'row', // Row direction for buttons side by side
