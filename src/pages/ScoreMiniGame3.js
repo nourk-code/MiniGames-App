@@ -1,17 +1,17 @@
-// pages/Score.js
+// pages/ScoreMiniGame3.js
 import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import React from 'react';
 
-const Score = ({ navigation, score, details, maxScore }) => {
+const ScoreMiniGame3 = ({ navigation, score, details, maxScore }) => {
     // Determine the message based on the score range
     const getMessage = (score, maxScore) => {
         if (score === maxScore) {
             return "Excellent work!";
-        } else if (score >= 200 && score < maxScore) {
+        } else if (score >= 300 && score < maxScore) {
             return "Good job!";
-        } else if (score >= 150 && score < 200) {
+        } else if (score >= 200 && score < 300) {
             return "Nice effort!";
-        } else if (score >= 100 && score < 150) {
+        } else if (score >= 100 && score < 200) {
             return "Keep trying!";
         } else {
             return "Better luck next time!";
@@ -31,8 +31,9 @@ const Score = ({ navigation, score, details, maxScore }) => {
                 {details.map((detail, index) => (
                     <View key={index} style={styles.detailRow}>
                         <Text style={styles.detailTitle}>Turn {index + 1}</Text>
-                        <Text style={styles.detailText}>Response Time: {detail.responseTime} s</Text>
-                        <Text style={styles.detailText}>Answer Score: {detail.answerScore} / 50</Text>
+                        <Text style={styles.detailText}>Response Time: {detail.responseTime.toFixed(2)} s</Text>
+                        <Text style={styles.detailText}>Correct: {detail.isCorrect ? 'Yes' : 'No'}</Text>
+                        <Text style={styles.detailText}>Score: {detail.points}</Text>
                     </View>
                 ))}
             </ScrollView>
@@ -46,8 +47,8 @@ const Score = ({ navigation, score, details, maxScore }) => {
 
 const styles = StyleSheet.create({
     container: {
-        height: '93%', // Set a specific height to make the container smaller
-        paddingTop: '10%', // Adjusted padding to fit the smaller height
+        height: '93%',
+        paddingTop: '10%',
         paddingHorizontal: 10,
         backgroundColor: '#f7f9fc', // Light background for better contrast
         alignItems: 'center',
@@ -57,16 +58,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
         color: 'black',
-        textAlign: 'center', // Center the text for better presentation
+        textAlign: 'center',
     },
     score: {
         fontSize: 30,
         color: 'blue',
         fontWeight: 'bold',
-        marginBottom: 15, // Adjusted margin to balance layout
+        marginBottom: 15,
     },
     scrollContainer: {
-        flex: 1, // Use flex to take up all available space
+        flex: 1, 
         width: '100%',
     },
     scrollContent: {
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 2, // Adds shadow for Android
+        elevation: 2,
     },
     detailTitle: {
         fontSize: 20,
@@ -95,10 +96,10 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     button: {
-        marginTop: 70, // Reduced margin to bring button higher
+        marginTop: 70,
         height: 50,
         width: 200,
-        backgroundColor: '#0047AB', // Nicer blue color for button
+        backgroundColor: '#0047AB', 
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 25,
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 3, // Adds shadow for Android
+        elevation: 3, 
     },
     buttonText: {
         fontSize: 20,
@@ -115,4 +116,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Score;
+export default ScoreMiniGame3;

@@ -1,9 +1,9 @@
 // reusable/Instructions.js
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
 import React, { useEffect } from "react";
 import * as ScreenOrientation from 'expo-screen-orientation';
 
-const Instructions = ({ navigation, route }) => {
+const Instructions = ({ navigation, route, visible, onClose }) => {
     const { text, url } = route.params;
 
     useEffect(() => {
@@ -17,47 +17,90 @@ const Instructions = ({ navigation, route }) => {
     }, []);
 
     return (
-        <View style={styles.container}>
-            <Text onPress={() => navigation.navigate(url)}
-                style={styles.headerText}
-            >
-                Instructions
-            </Text>
-            <Text style={styles.instructionText}>{text} </Text>
-            <TouchableOpacity style={styles.nextButton}>
-                <Text style={styles.buttonText} onPress={() => navigation.navigate(url)}>Next</Text>
-            </TouchableOpacity>
-        </View>
-    )
-}
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose} // Use onClose to close the modal
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                    <Text style={styles.headerText}>
+                        Instructions
+                    </Text>
+                    <Text style={styles.instructionText}>{text}</Text>
+                    <View style={styles.buttonWrapper}>
+                        <TouchableOpacity style={styles.nextButton} onPress={() => {
+                            navigation.navigate(url);
+                            onClose(); // Close the modal and navigate to the next screen
+                        }}>
+                            <Text style={styles.buttonText}>Next</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                            <Text style={styles.buttonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+};
 
 const styles = StyleSheet.create({
-    container: {
+    modalOverlay: {
         flex: 1,
-        padding: '5%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background with opacity
+    },
+    modalContainer: {
+        width: '60%', // Smaller width for modal
+        backgroundColor: 'white',
+        borderRadius: 15, // Slightly larger radius for a softer look
+        paddingVertical: 60, // Reduced padding for a compact design
+        paddingHorizontal: 15,
+        alignItems: 'center',
     },
     headerText: {
-        fontSize: 28
+        fontSize: 27, // Slightly smaller font size
+        marginBottom: 15,
+        fontWeight: 'bold',
     },
     instructionText: {
-        fontSize: 18,
-        marginTop: '4%'
+        fontSize: 20,
+        marginTop: 20,
+        textAlign: 'center',
+    },
+    buttonWrapper: {
+        flexDirection: 'row', // Row direction for buttons side by side
+        justifyContent: 'space-between', // Add space between the buttons
+        marginTop: 60, // Margin from the text above
     },
     nextButton: {
-        position: 'relative',
-        marginTop: '15%',
-        alignSelf: 'flex-end',
-        width: 150,
-        height: 70,
-        backgroundColor: 'blue',
+        width: 120,
+        height: 50,
+        backgroundColor: '#0047AB', // Use blue color for both buttons
         flexDirection: "row",
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderRadius: 10, // Slightly larger radius for a modern look
+        marginHorizontal: 5, // Space between the buttons
+    },
+    closeButton: {
+        width: 120,
+        height: 50,
+        backgroundColor: '#0047AB', // Use blue color for the close button as well
+        flexDirection: "row",
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        marginHorizontal: 5, // Space between the buttons
     },
     buttonText: {
-        fontSize: 20,
-        color: 'white'
+        fontSize: 18,
+        color: 'white',
+        fontWeight: 'bold',
     }
-})
+});
 
-export default Instructions
+export default Instructions;

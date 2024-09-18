@@ -1,119 +1,156 @@
-//pages/ MiniGame1.js
+// pages/MiniGame1.js
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { euclideans } from "../utils/euclideans";
 import Score from "./Score";
+
 const MiniGame1 = ({ navigation, route }) => {
-    const { listIndex } = route.params;
-    const [index, setIndex] = useState(Math.floor(Math.random() * euclideans.length))
+    const { listIndex } = route.params; // Get list of indices shown in DemoGame1
+    const [index, setIndex] = useState(-1);
     const [score, setScore] = useState(0);
     const [turn, setTurn] = useState(0);
+    const [startTime, setStartTime] = useState(Date.now()); // Track start time
+    const [details, setDetails] = useState([]); // Store score details
+    const [shownIndexes, setShownIndexes] = useState([]); // Track shown images to avoid repetition
+
+    const maxScore = 250; // Correct maximum possible score: 5 turns, each with a max score of 50
 
     useEffect(() => {
-        if (listIndex.length > 3) {
-            listIndex.pop()
-        }
-    })
+        selectRandomIndex();
+    }, []);
 
-    const definetlyYes = () => {
-        if (listIndex.includes(index)) {
-            setScore(score + 50)
-        } else {
-            setScore(score - 50)
-        }
-        turnAndIndex()
-    }
+    const selectRandomIndex = () => {
+        const availableIndexes = [...Array(euclideans.length).keys()].filter(
+            (i) => !shownIndexes.includes(i) // Exclude already shown images
+        );
 
-    const definetlyNo = () => {
-        if (!listIndex.includes(index)) {
-            setScore(score + 50)
+        if (availableIndexes.length > 0) {
+            const randomIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+            setIndex(randomIndex);
+            setShownIndexes((prevShownIndexes) => [...prevShownIndexes, randomIndex]); // Mark this image as shown
+            setStartTime(Date.now());
         } else {
-            setScore(score - 50)
+            console.log("No more unique images available.");
         }
-        turnAndIndex()
-    }
+    };
 
-    const probablyYes = () => {
-        if (listIndex.includes(index)) {
-            setScore(score + 25)
-        } else {
-            setScore(score - 25)
-        }
-        turnAndIndex()
-    }
+    const calculateScore = (userChoice) => {
+        const responseTime = (Date.now() - startTime) / 1000; // Time taken in seconds
+        let answerScore = 0;
 
-    const probablyNo = () => {
-        if (!listIndex.includes(index)) {
-            setScore(score + 25)
+        const isCorrect = listIndex.includes(index); // Check if the image was shown in DemoGame1
+
+        if ((isCorrect && userChoice === "Definitely Yes") || (isCorrect && userChoice === "Probably Yes")) {
+            answerScore = userChoice === "Definitely Yes" ? 50 : 25;
+        } else if ((!isCorrect && userChoice === "Definitely No") || (!isCorrect && userChoice === "Probably No")) {
+            answerScore = userChoice === "Definitely No" ? 50 : 25;
         } else {
-            setScore(score - 25)
+            answerScore = 0; // Incorrect answer gets 0 points
         }
-        turnAndIndex()
-    }
+
+        setScore((prevScore) => prevScore + answerScore); // Update total score
+
+        // Add the score details for display later
+        setDetails((prevDetails) => [
+            ...prevDetails,
+            {
+                responseTime: responseTime.toFixed(2),
+                answerScore: answerScore,
+            },
+        ]);
+
+        turnAndIndex();
+    };
+
+    const handleAnswer = (choice) => {
+        calculateScore(choice);
+    };
 
     const turnAndIndex = () => {
-        setTurn(turn + 1);
-        setIndex(Math.floor(Math.random() * euclideans.length))
-    }
+        setTurn((prevTurn) => prevTurn + 1);
+        selectRandomIndex();
+    };
 
     return (
         <>
-            {turn < 5 &&
+            {turn < 5 ? (
                 <View style={styles.container}>
-                    <View style={{ width: '100%', height: '70%', paddingTop: 10, flexDirection: 'row', justifyContent: 'center' }}>
-                        <Image style={styles.img} source={euclideans[index].url} />
+                    <View style={styles.imageContainer}>
+                        {index !== -1 && (
+                            <Image style={styles.img} source={euclideans[index].url} />
+                        )}
                     </View>
 
-                    <View style={{
-                        flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between',
-                        height: '25%', width: '100%', paddingHorizontal: 10
-                    }}>
-                        <TouchableOpacity style={styles.button} onPress={() => definetlyYes()}>
+                    <View style={styles.buttonsContainer}>
+                        <TouchableOpacity style={styles.button} onPress={() => handleAnswer("Definitely Yes")}>
                             <Text style={styles.text}>Definitely Yes</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => probablyYes()}>
+                        <TouchableOpacity style={styles.button} onPress={() => handleAnswer("Probably Yes")}>
                             <Text style={styles.text}>Probably Yes</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => probablyNo()}>
+                        <TouchableOpacity style={styles.button} onPress={() => handleAnswer("Probably No")}>
                             <Text style={styles.text}>Probably No</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => definetlyNo()}>
+                        <TouchableOpacity style={styles.button} onPress={() => handleAnswer("Definitely No")}>
                             <Text style={styles.text}>Definitely No</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-            }
-
-            {turn >= 5 &&
-                <Score navigation={navigation} score={score} />
-            }
+            ) : (
+                <Score navigation={navigation} score={score} details={details} maxScore={maxScore} />
+            )}
         </>
-
-    )
-}
-
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f8f8f8", // Light background color for better contrast
+    },
+    imageContainer: {
+        width: "100%",
+        height: "70%",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingTop: 10,
     },
     img: {
-        width: '50%',
-        height: '100%'
+        width: "90%", // Adjusted width to ensure it's not too large
+        height: "90%", // Adjusted height to keep aspect ratio
+        resizeMode: "contain", // Keeps the aspect ratio of the image
+    },
+    buttonsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-around",
+        height: "20%",
+        width: "100%",
+        paddingHorizontal: 10,
     },
     button: {
-        height: '100%',
-        width: '20%',
-        backgroundColor: 'blue',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
+        width: "22%",
+        backgroundColor: "#0047AB", // A nicer blue color for buttons
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+        paddingVertical: 20,
+        marginHorizontal: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3, // Adds shadow for Android
     },
     text: {
-        color: 'white',
-        fontSize: 18
-    }
-
-})
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+});
 
 export default MiniGame1;
