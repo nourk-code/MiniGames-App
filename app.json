@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "minigamesproj",
+    "name": "minigames",
     "slug": "minigamesproj",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/iconz.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -16,12 +16,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/iconzz.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.aubmc.minigames"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cb7099db-4599-4b91-b3b9-f2a897514c27"
+      }
     }
   }
 }

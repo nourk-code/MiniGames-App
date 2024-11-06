@@ -1,6 +1,6 @@
 // pages/DemoGame1.js
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, View, Button } from "react-native";
+import { Image, StyleSheet, View, Dimensions } from "react-native";
 import { euclideans } from "../utils/euclideans";
 import InstructionsDemo1 from "./InstructionsDemo1";
 
@@ -8,6 +8,8 @@ const DemoGame1 = ({ navigation }) => {
   const [shapeIndex, setShapeIndex] = useState(-1);
   const [listIndex, setListIndex] = useState([]);
   const [showInstructions, setShowInstructions] = useState(false);
+
+  const { width, height } = Dimensions.get("window"); // Get screen dimensions
 
   useEffect(() => {
     if (listIndex.length >= 3) {
@@ -41,14 +43,15 @@ const DemoGame1 = ({ navigation }) => {
     console.log("Current Shape Index:", shapeIndex);
   }, [listIndex, shapeIndex]);
 
-  
-
   return (
     <>
       {!showInstructions ? (
         <View style={styles.container}>
           {shapeIndex !== -1 && (
-            <Image style={styles.img} source={euclideans[shapeIndex].url} />
+            <Image
+              style={[styles.img, { width: width * 0.5, height: height * 0.5 }]} // Set the image to take up 30% of the screen
+              source={euclideans[shapeIndex].url}
+            />
           )}
         </View>
       ) : (
@@ -58,7 +61,7 @@ const DemoGame1 = ({ navigation }) => {
           listIndex={listIndex}
         />
       )}
-      {showInstructions }
+      {showInstructions}
     </>
   );
 };
@@ -71,8 +74,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   img: {
-    height: "50%",
-    width: "40%",
+    // The width and height will be dynamically set to 30% of the screen size
+    resizeMode: "contain", // Ensures the image maintains aspect ratio
   },
 });
 

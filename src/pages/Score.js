@@ -19,38 +19,36 @@ const Score = ({ navigation, score, details, maxScore }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             {/* Display the score and dynamic message */}
             <Text style={styles.title}> {getMessage(score, maxScore)}</Text>
             <Text style={styles.score}>
                 {`${score} / ${maxScore}`}
             </Text>
 
-            {/* Scrollable container for score details */}
-            <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
-                {details.map((detail, index) => (
-                    <View key={index} style={styles.detailRow}>
-                        <Text style={styles.detailTitle}>Turn {index + 1}</Text>
-                        <Text style={styles.detailText}>Response Time: {detail.responseTime} s</Text>
-                        <Text style={styles.detailText}>Answer Score: {detail.answerScore} / 50</Text>
-                    </View>
-                ))}
-            </ScrollView>
+            {/* Container for score details */}
+            {details.map((detail, index) => (
+                <View key={index} style={styles.detailRow}>
+                    <Text style={styles.detailTitle}>Turn {index + 1}</Text>
+                    <Text style={styles.detailText}>Response Time: {detail.responseTime} s</Text>
+                    <Text style={styles.detailText}>Answer Score: {detail.answerScore} / 50</Text>
+                </View>
+            ))}
 
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
                 <Text style={styles.buttonText}>Home Page</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        height: '93%', // Set a specific height to make the container smaller
         paddingTop: '10%', // Adjusted padding to fit the smaller height
         paddingHorizontal: 10,
         backgroundColor: '#f7f9fc', // Light background for better contrast
         alignItems: 'center',
+        paddingBottom: 30, // Extra padding at the bottom for scrolling
     },
     title: {
         fontSize: 27,
@@ -65,19 +63,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 15, // Adjusted margin to balance layout
     },
-    scrollContainer: {
-        flex: 1, // Use flex to take up all available space
-        width: '100%',
-    },
-    scrollContent: {
-        alignItems: 'center',
-        paddingBottom: 20,
-    },
     detailRow: {
         backgroundColor: '#fff',
         marginBottom: 15,
         padding: 15,
-        width: '90%',
+        width: '80%',
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -95,7 +85,7 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     button: {
-        marginTop: 70, // Reduced margin to bring button higher
+        marginTop: 30, // Adjusted margin for better layout
         height: 50,
         width: 200,
         backgroundColor: '#0047AB', // Nicer blue color for button

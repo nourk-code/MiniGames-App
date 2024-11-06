@@ -1,10 +1,12 @@
 // reusable/Instructions.js
-import { StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Modal, Dimensions } from "react-native";
 import React, { useEffect } from "react";
 import * as ScreenOrientation from 'expo-screen-orientation';
 
 const Instructions = ({ navigation, route, visible, onClose, extraText }) => {
     const { text, url } = route.params;
+
+    const { width, height } = Dimensions.get('window'); // Get the screen dimensions
 
     useEffect(() => {
         // Lock the screen orientation to landscape
@@ -16,6 +18,10 @@ const Instructions = ({ navigation, route, visible, onClose, extraText }) => {
         };
     }, []);
 
+    // Define a base value to scale the text size
+    const baseWidth = 400; // You can change this based on your design
+    const scale = width / baseWidth;
+
     return (
         <Modal
             animationType="slide"
@@ -24,22 +30,31 @@ const Instructions = ({ navigation, route, visible, onClose, extraText }) => {
             onRequestClose={onClose} // Use onClose to close the modal
         >
             <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
-                    <Text style={styles.headerText}>
+                <View style={[
+                    styles.modalContainer,
+                    { width: width * 0.6, height: height * 0.6, maxHeight: height * 0.8 } // Adjust height if necessary
+                ]}>
+                    <Text style={[styles.headerText, { fontSize: 8 * scale }]}>
                         Instructions
                     </Text>
-                    <Text style={styles.instructionText}>{text}</Text>
-                    {/* Conditionally render extra text if provided */}
+                    <Text style={[styles.instructionText, { fontSize: 5 * scale }]}>{text}</Text>
                     {extraText && (
-                        <Text style={styles.extraText}>
+                        <Text style={[styles.extraText, { fontSize: 5 * scale }]}>
                             {extraText}
                         </Text>
                     )}
                     <View style={styles.buttonWrapper}>
-                        <TouchableOpacity style={styles.nextButton} onPress={() => {
-                            navigation.navigate(url);
-                            onClose(); // Close the modal and navigate to the next screen
-                        }}>
+                        <TouchableOpacity
+                            style={styles.nextButton}
+                            onPress={() => {
+                                if (url === 'game2') {
+                                    navigation.navigate('game2', { questionIndex: 0, score: 0 });
+                                } else {
+                                    navigation.navigate(url); // For other screens, navigate normally
+                                }
+                                onClose(); // Close the modal
+                            }}
+                        >
                             <Text style={styles.buttonText}>Next</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -60,57 +75,56 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background with opacity
     },
     modalContainer: {
-        width: '60%', // Smaller width for modal
         backgroundColor: 'white',
         borderRadius: 15, // Slightly larger radius for a softer look
-        paddingVertical: 60, // Reduced padding for a compact design
+        paddingVertical: 50, // Adjusted padding for a compact design
         paddingHorizontal: 15,
         alignItems: 'center',
+        justifyContent: 'space-between', // Ensure the buttons and text fit
+        flexShrink: 1, // Shrinks content if it exceeds available space
     },
     headerText: {
-        fontSize: 27, // Slightly smaller font size
-        marginBottom: 15,
+        marginBottom: 10,
         fontWeight: 'bold',
     },
     instructionText: {
-        fontSize: 20,
-        marginTop: 20,
-        textAlign: 'center',
-    },
-    extraText: {
-        fontSize: 20,
-        color: "black", // Use grey for extra text
         marginTop: 10,
         textAlign: 'center',
-        fontStyle: 'italic', // Italic to differentiate extra text
+        flexShrink: 1, // Allow text to shrink if necessary
+    },
+    extraText: {
+        color: "black", 
+        
+        textAlign: 'center',
+        fontStyle: 'italic', 
     },
     buttonWrapper: {
-        flexDirection: 'row', // Row direction for buttons side by side
-        justifyContent: 'space-between', // Add space between the buttons
-        marginTop: 60, // Margin from the text above
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginTop: 5, 
     },
     nextButton: {
-        width: 120,
-        height: 50,
-        backgroundColor: '#0047AB', // Use blue color for both buttons
-        flexDirection: "row",
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 10, // Slightly larger radius for a modern look
-        marginHorizontal: 5, // Space between the buttons
-    },
-    closeButton: {
-        width: 120,
-        height: 50,
-        backgroundColor: '#0047AB', // Use blue color for the close button as well
+        width: 100, // Adjust button size to fit smaller modals
+        height: 40,
+        backgroundColor: '#0047AB',
         flexDirection: "row",
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
-        marginHorizontal: 5, // Space between the buttons
+        marginHorizontal: 5, 
+    },
+    closeButton: {
+        width: 100,
+        height: 40,
+        backgroundColor: '#0047AB', 
+        flexDirection: "row",
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        marginHorizontal: 5, 
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: 16, 
         color: 'white',
         fontWeight: 'bold',
     }

@@ -1,39 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import ScoreMiniGame3 from './ScoreMiniGame3'; // Use the new Score component
+import ScoreMiniGame3 from './ScoreMiniGame3';
 
 const MiniGame3 = ({ navigation }) => {
   const symbols = ["!", "@", "#", "$", "%", "^", "&", "(", ")"];
-  const [randomIndex, setRandomIndex] = useState(null); // Start with null to select a symbol later
-  const [result, setResult] = useState(null);
+  const [randomIndex, setRandomIndex] = useState(null);
+  const [lastRandomIndex, setLastRandomIndex] = useState(null);
   const [score, setScore] = useState(0);
   const [turns, setTurns] = useState(0);
-  const [details, setDetails] = useState([]); // Store details for each turn
+  const [details, setDetails] = useState([]);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [startTime, setStartTime] = useState(0);
-  const [usedSymbols, setUsedSymbols] = useState([]); // Track used symbols
+  const [usedSymbols, setUsedSymbols] = useState([]);
+  const [screenSize, setScreenSize] = useState(Dimensions.get('window')); // Store dimensions in state
 
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-    setStartTime(Date.now());
-    generateNewSymbol(); // Generate the first symbol when the component mounts
+    generateNewSymbol();
+
+    // Listen to dimension changes
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setScreenSize(window);
+    });
 
     return () => {
       ScreenOrientation.unlockAsync();
+      subscription?.remove(); // Clean up event listener
     };
   }, []);
 
-  useEffect(() => {
-    console.log('Current game details:', details); // Log the details array to the console
-  }, [details]); // This will run every time the details array updates
-
   const generateNewSymbol = () => {
-    // Filter the available symbols excluding the used ones
+    setIsAnswerSubmitted(false);
+    setStartTime(Date.now());
+
     const availableSymbols = symbols.filter((_, index) => !usedSymbols.includes(index));
+    
     if (availableSymbols.length > 0) {
-      const newRandomIndex = Math.floor(Math.random() * availableSymbols.length);
-      setRandomIndex(symbols.indexOf(availableSymbols[newRandomIndex]));
+      let newRandomIndex;
+      do {
+        newRandomIndex = Math.floor(Math.random() * availableSymbols.length);
+      } while (newRandomIndex === lastRandomIndex && availableSymbols.length > 1);
+
+      const selectedSymbol = symbols.indexOf(availableSymbols[newRandomIndex]);
+      setRandomIndex(selectedSymbol);
+      setLastRandomIndex(newRandomIndex);
     } else {
       console.log("All symbols used!");
     }
@@ -42,175 +53,127 @@ const MiniGame3 = ({ navigation }) => {
   const submitAnswer = (index) => {
     if (!isAnswerSubmitted) {
       setIsAnswerSubmitted(true);
+
       const endTime = Date.now();
-      const responseTime = (endTime - startTime) / 1000; // Calculate response time in seconds
+      const responseTime = (endTime - startTime) / 1000;
+
       const isCorrect = index === randomIndex;
-      let points = isCorrect ? 50 : 0; // Each correct answer is 50 points, wrong answer is 0 points
+      const points = isCorrect ? 50 : 0;
 
       setScore((prevScore) => prevScore + points);
 
-      // Save the turn details including response time
       const turnDetails = {
         responseTime,
         isCorrect,
         points,
       };
 
-      // Add the current turn details to the state using functional update
       setDetails((prevDetails) => [...prevDetails, turnDetails]);
 
-      // Add the current randomIndex to the usedSymbols array using functional update
-      setUsedSymbols((prevUsedSymbols) => [...prevUsedSymbols, randomIndex]);
+      if (isCorrect) {
+        setUsedSymbols((prevUsedSymbols) => [...prevUsedSymbols, randomIndex]);
+      }
 
-      // Immediately generate a new symbol and reset the answer submission flag after
-      generateNewSymbol();
-
-      // Set a new start time for the next round
-      setStartTime(Date.now());
-
-      // Reset the answer submission flag after updating the symbol
-      setTimeout(() => {
-        setIsAnswerSubmitted(false);
-      }, 300); // Small delay to prevent instant re-clicks
-
-      // Increase the number of turns
       setTurns((prevTurns) => prevTurns + 1);
+
+      if (turns < 4) {
+        generateNewSymbol();
+      } else {
+        console.log('Game Finished: Max Turns Reached');
+      }
     }
   };
 
   return (
-    <>
-      {turns < 5 ? ( // Adjusted to 5 turns
-        <View style={styles.container}>
-          <View style={styles.topSection}>
-            {result != null && (
-              <View
-                style={[
-                  styles.resultContainer,
-                  result === true ? styles.resultContainerCorrect : styles.resultContainerIncorrect,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.resultText,
-                    result === true ? styles.resultTextCorrect : styles.resultTextIncorrect,
-                  ]}
-                >
-                  {result === true ? 'Correct' : 'Incorrect'}
-                </Text>
-              </View>
-            )}
-            <View style={styles.symbolContainer}>
-              <Text style={styles.symbol}>{symbols[randomIndex]}</Text>
+    <View style={styles.container(screenSize)}>
+      {turns < 5 ? (
+        <>
+          <View style={styles.topSection(screenSize)}>
+            <View style={styles.symbolContainer(screenSize)}>
+              <Text style={styles.symbol(screenSize)}>{symbols[randomIndex]}</Text>
             </View>
           </View>
 
-          <View style={styles.symbolsLine}>
+          <View style={styles.symbolsLine(screenSize)}>
             {symbols.map((symbol, index) => (
               <View key={index} style={styles.symbolItem}>
-                <Text style={styles.symbolButtonText}>{symbol}</Text>
+                <Text style={styles.symbolButtonText(screenSize)}>{symbol}</Text>
                 <TouchableOpacity
-                  style={styles.symbolButton}
+                  style={styles.symbolButton(screenSize)}
                   onPress={() => submitAnswer(index)}
-                  disabled={usedSymbols.includes(index)}
+                  disabled={usedSymbols.includes(index) || isAnswerSubmitted}
                 >
-                  <Text style={styles.buttonText}>{index + 1}</Text>
+                  <Text style={styles.buttonText(screenSize)}>{index + 1}</Text>
                 </TouchableOpacity>
               </View>
             ))}
           </View>
-        </View>
+        </>
       ) : (
-        <ScoreMiniGame3 score={score} maxScore={250} details={details} navigation={navigation} /> // Total out of 250
+        <ScoreMiniGame3 score={score} maxScore={250} details={details} navigation={navigation} />
       )}
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, // Take up the entire screen
-    justifyContent: 'center', // Center vertically
-    alignItems: 'center', // Center horizontally
-    backgroundColor: '#f0f4f7',
-  },
-  topSection: {
-    flexDirection: 'row',
-    justifyContent: 'center', // Center the items horizontally
-    alignItems: 'center', // Align the items vertically
-    marginBottom: 200,
-  },
-  resultContainer: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
+  container: (screenSize) => ({
+    flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    elevation: 3,
-    marginRight: 20,
-  },
-  resultContainerCorrect: {
-    borderColor: '#28a745',
-    backgroundColor: '#d4edda',
-  },
-  resultContainerIncorrect: {
-    borderColor: '#dc3545',
-    backgroundColor: '#f8d7da',
-  },
-  resultText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  resultTextCorrect: {
-    color: '#155724',
-  },
-  resultTextIncorrect: {
-    color: '#721c24',
-  },
-  symbolContainer: {
+    alignItems: 'center',
+    backgroundColor: '#f0f4f7',
+    padding: screenSize.width * 0.04,
+  }),
+  topSection: (screenSize) => ({
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: screenSize.height * 0.2,
+  }),
+  symbolContainer: (screenSize) => ({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     backgroundColor: '#007bff',
-    padding: 20,
-    width: '25%',
+    padding: screenSize.height * 0.02,
+    width: screenSize.width * 0.2,
     elevation: 3,
-  },
-  symbol: {
-    fontSize: 50,
+  }),
+  symbol: (screenSize) => ({
+    fontSize: screenSize.height * 0.05,
     color: '#fff',
-  },
-  symbolsLine: {
+  }),
+  symbolsLine: (screenSize) => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: screenSize.width * 0.03,
     width: '100%',
-  },
+  }),
   symbolItem: {
     alignItems: 'center',
   },
-  symbolButtonText: {
-    fontSize: 40,
-    marginBottom: 10,
+  symbolButtonText: (screenSize) => ({
+    fontSize: screenSize.height * 0.03,
+    marginBottom: screenSize.height * 0.005,
     color: '#333',
-  },
-  symbolButton: {
+  }),
+  symbolButton: (screenSize) => ({
     borderWidth: 2,
     borderColor: '#007bff',
     backgroundColor: '#007bff',
     borderRadius: 12,
-    height: 60,
-    width: 60,
+    height: screenSize.height * 0.08,
+    width: screenSize.height * 0.08,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-  },
-  buttonText: {
-    fontSize: 25,
+  }),
+  buttonText: (screenSize) => ({
+    fontSize: screenSize.height * 0.025,
     color: '#fff',
     fontWeight: 'bold',
-  },
+  }),
 });
 
 export default MiniGame3;

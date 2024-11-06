@@ -1,8 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
-import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Dimensions } from "react-native";
+import React, { useEffect, useState } from 'react';
+
+// Capture the screen dimensions once at the start
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const ScoreMiniGame3 = ({ navigation, score, details, maxScore }) => {
-    // Average time that people who are conscious take (11-12 seconds)
     const averageTimeMin = 11;
     const averageTimeMax = 12;
 
@@ -35,26 +37,19 @@ const ScoreMiniGame3 = ({ navigation, score, details, maxScore }) => {
     };
 
     return (
-        <View style={styles.container}>
-            {/* Display the score and dynamic message */}
-            <Text style={styles.title}> {getMessage(score, maxScore)}</Text>
-            <Text style={styles.score}>
-                {`${score} / ${maxScore}`}
-            </Text>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.container}>
+                {/* Display the score and dynamic message */}
+                <Text style={styles.title}>{getMessage(score, maxScore)}</Text>
+                <Text style={styles.score}>{`${score} / ${maxScore}`}</Text>
 
-            {/* Display total time taken */}
+                {/* Display total time taken */}
+                <View style={styles.feedbackContainer}>
+                    <Text style={styles.totalTime}>Total Time: {totalTime} seconds</Text>
+                    <Text style={styles.timeFeedbackText}>{getTimeFeedback()}</Text>
+                </View>
 
-            {/* Display average time feedback */}
-            <View style={styles.feedbackContainer}>
-            <Text style={styles.totalTime}>Total Time: {totalTime} seconds</Text>
-
-                <Text style={styles.timeFeedbackText}>
-                    {getTimeFeedback()}
-                </Text>
-            </View>
-
-            {/* Scrollable container for score details */}
-            <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+                {/* Scrollable container for score details */}
                 {(details || []).map((detail, index) => (
                     <View key={index} style={styles.detailRow}>
                         <Text style={styles.detailTitle}>Turn {index + 1}</Text>
@@ -63,25 +58,29 @@ const ScoreMiniGame3 = ({ navigation, score, details, maxScore }) => {
                         <Text style={styles.detailText}>Score: {detail.points}</Text>
                     </View>
                 ))}
-            </ScrollView>
 
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
-                <Text style={styles.buttonText}>Home Page</Text>
-            </TouchableOpacity>
-        </View>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
+                    <Text style={styles.buttonText}>Home Page</Text>
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
+    scrollContent: {
+        flexGrow: 1, // Ensure the scrollable content takes up the entire height
+        justifyContent: 'center', // Center the content if it's not long enough to scroll
+    },
     container: {
-        height: '96%',
         paddingTop: '10%',
         paddingHorizontal: 10,
-        backgroundColor: '#f7f9fc', // Light background for better contrast
+        backgroundColor: '#f7f9fc',
         alignItems: 'center',
+        paddingBottom: 30,
     },
     title: {
-        fontSize: 27,
+        fontSize: 27, // Use fixed font sizes for consistency
         fontWeight: 'bold',
         marginBottom: 10,
         color: 'black',
@@ -94,7 +93,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     totalTime: {
-        fontSize: 20,
+        fontSize: 18, // Fixed size for consistency
         color: 'black',
         fontWeight: 'bold',
         marginBottom: 10,
@@ -104,34 +103,20 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: '#eef1f5',
         borderRadius: 10,
-        width: '90%',
+        width: '100%',
         alignItems: 'center',
     },
-    averageTimeText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 5,
-    },
     timeFeedbackText: {
-        fontSize: 20,
+        fontSize: 18, // Fixed size for consistency
         color: '#007bff',
         fontWeight: 'bold',
         textAlign: 'center',
-    },
-    scrollContainer: {
-        flex: 1, 
-        width: '100%',
-    },
-    scrollContent: {
-        alignItems: 'center',
-        paddingBottom: 20,
     },
     detailRow: {
         backgroundColor: '#fff',
         marginBottom: 15,
         padding: 15,
-        width: '90%',
+        width: '100%',
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -149,10 +134,10 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     button: {
-        marginTop: 70,
+        marginTop: 30,
         height: 50,
         width: 200,
-        backgroundColor: '#0047AB', 
+        backgroundColor: '#0047AB',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 25,
@@ -160,13 +145,13 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 3, 
+        elevation: 3,
     },
     buttonText: {
         fontSize: 20,
         fontWeight: 'bold',
         color: 'white',
-    }
+    },
 });
 
 export default ScoreMiniGame3;

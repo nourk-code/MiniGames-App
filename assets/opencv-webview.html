@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenCV.js Iris Detection</title>
+  <!-- Load OpenCV.js from CDN -->
+  <script async src="https://docs.opencv.org/3.4.0/opencv.js" onload="onOpenCvReady()"></script>
+</head>
+<body>
+  <h2>Testing OpenCV.js Loading</h2>
+  <canvas id="canvasOutput"></canvas>
+
+  <script>
+    // Function called when OpenCV is ready
+    function onOpenCvReady() {
+      console.log('OpenCV.js is ready');
+      if (typeof cv !== 'undefined') {
+        console.log('OpenCV is loaded successfully!');
+        // Perform any OpenCV-related operations here
+      } else {
+        console.error('OpenCV failed to load.');
+      }
+    }
+
+    // Check after a delay to see if OpenCV is loaded (for debugging purposes)
+    setTimeout(() => {
+      if (typeof cv !== 'undefined') {
+        console.log('OpenCV is loaded after delay.');
+      } else {
+        console.error('OpenCV is still not loaded after delay.');
+      }
+    }, 3000);
+  </script>
+</body>
+</html>

@@ -5,11 +5,13 @@ const ScoreMiniGame6 = ({ navigation, reactionTimes }) => {
     // Ensure reactionTimes is not undefined or null
     if (!reactionTimes || reactionTimes.length === 0) {
         return (
-            <View style={styles.container}>
-                <Text style={styles.title}> No data available for reaction times </Text>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
-                    <Text style={styles.buttonText}>Home Page</Text>
-                </TouchableOpacity>
+            <View style={styles.wrapper}>
+                <View style={styles.container}>
+                    <Text style={styles.title}> No data available for reaction times </Text>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
+                        <Text style={styles.buttonText}>Home Page</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     }
@@ -33,74 +35,85 @@ const ScoreMiniGame6 = ({ navigation, reactionTimes }) => {
     };
 
     return (
-        <View style={styles.container}>
-            {/* Display the dynamic feedback and reaction times */}
-            <Text style={styles.title}> {getFeedback(averageTime)} </Text>
-            <Text style={styles.score}>{`Your average reaction time: ${averageTime.toFixed(2)} ms`}</Text>
+        <View style={styles.wrapper}>
+            <View style={styles.container}>
+                {/* Display the dynamic feedback and reaction times */}
+                <Text style={styles.title}> {getFeedback(averageTime)} </Text>
+                <Text style={styles.score}>{`Your average reaction time: ${averageTime.toFixed(2)} ms`}</Text>
 
-            {/* Comparison with the average reaction time for a conscious person */}
-            <Text style={styles.comparison}>
-                {`Average reaction time of a person with good reflexes is below 700 ms.`}
-            </Text>
-
-            {/* List individual reaction times */}
-            {reactionTimes.map((time, index) => (
-                <Text key={index} style={styles.reactionTime}>
-                    {`Turn ${index + 1}: ${time ? time.toFixed(2) : 'No data'} ms`}
+                {/* Comparison with the average reaction time for a conscious person */}
+                <Text style={styles.comparison}>
+                    {`Average reaction time of a person with good reflexes is below 700 ms.`}
                 </Text>
-            ))}
 
-            {/* Button to return to the home page */}
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
-                <Text style={styles.buttonText}>Home Page</Text>
-            </TouchableOpacity>
+                {/* List individual reaction times */}
+                {reactionTimes.map((time, index) => (
+                    <Text key={index} style={styles.reactionTime}>
+                        {`Turn ${index + 1}: ${time ? time.toFixed(2) : 'No data'} ms`}
+                    </Text>
+                ))}
+
+                {/* Button to return to the home page */}
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("landing")}>
+                    <Text style={styles.buttonText}>Home Page</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    wrapper: {
+        flex: 1, // Fill the screen
+        justifyContent: 'center', // Center the container vertically
+        alignItems: 'center', // Center the container horizontally
+        backgroundColor: "#ffffff", // Optional: set a background color if needed
+    },
     container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f7f9fc",
-        paddingHorizontal: 20,
+        width: '70%', // 70% of the screen width
+        height: '70%', // 70% of the screen height
+        backgroundColor: "white",
+        paddingVertical: '5%', // Percentage-based padding
+        paddingHorizontal: '5%', // Percentage-based padding
+        borderRadius: 10,
+        justifyContent: 'space-around', // Evenly distribute elements in the container
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
     },
     title: {
-        fontSize: 27,
+        fontSize: 20, // Fixed font size
         fontWeight: "bold",
-        marginBottom: 10,
         color: "black",
         textAlign: "center",
     },
     score: {
-        fontSize: 30,
+        fontSize: 20, // Fixed font size
         color: "blue",
         fontWeight: "bold",
-        marginBottom: 15,
         textAlign: "center",
     },
     comparison: {
-        fontSize: 20,
+        fontSize: 14, // Fixed font size
         color: "#555",
-        marginBottom: 20,
         textAlign: "center",
         fontStyle: "italic", // Added italics for the comparison
     },
     reactionTime: {
-        fontSize: 18,
+        fontSize: 14, // Fixed font size
         color: "#333",
-        marginBottom: 5,
         textAlign: "center",
     },
     button: {
-        marginTop: 50,
-        height: 50,
-        width: 200,
+        height: 40, // Fixed button height
+        width: '20%', // Percentage-based button width
         backgroundColor: "#0047AB",
         justifyContent: "center",
         alignItems: "center",
-        borderRadius: 25,
+        borderRadius: 20,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -108,7 +121,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     buttonText: {
-        fontSize: 20,
+        fontSize: 14, // Fixed font size
         fontWeight: "bold",
         color: "white",
     },

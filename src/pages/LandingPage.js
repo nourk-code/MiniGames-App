@@ -1,126 +1,156 @@
-import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, ImageBackground, FlatList } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View, Dimensions, ScrollView, FlatList } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import Instructions from '../reusable/Instructions'; // Import Instructions component
-
-const { width: screenWidth } = Dimensions.get('window'); // Get initial screen width
+import Instructions from '../reusable/Instructions';
+import { ImageBackground } from 'react-native';
 
 const LandingPage = ({ navigation }) => {
-  const [width, setWidth] = useState(screenWidth * 0.96); // Initialize with 96% of screen width
-  const [isModalVisible, setModalVisible] = useState(false); // State for modal visibility
-  const [modalContent, setModalContent] = useState({}); // State for modal content
-  const [extraText, setExtraText] = useState(null); // State for extra text
+  // Hooks must be inside the component function
+  const [dimensions, setDimensions] = useState({
+    screenWidth: Dimensions.get('window').width,
+    screenHeight: Dimensions.get('window').height,
+  });
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState({});
+  const [extraText, setExtraText] = useState(null);
 
   useEffect(() => {
-    // Lock the screen orientation to landscape
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    (async () => {
+      // Lock screen orientation to landscape
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
 
-    const handleResize = () => {
-      const { width } = Dimensions.get('window'); // Get the current screen width
-      setWidth(width * 0.96); // Update the widget width to be 96% of the new width
-    };
+      const handleResize = () => {
+        const { width, height } = Dimensions.get('window');
+        setDimensions({ screenWidth: width, screenHeight: height }); // Update both width and height
+      };
+      
+      // Set initial dimensions
+      handleResize();
 
-    // Listen for screen dimension changes
-    const subscription = Dimensions.addEventListener('change', handleResize);
-
-    return () => {
-      // Cleanup the subscription and unlock all orientations when the component unmounts
-      subscription?.remove();
-      ScreenOrientation.unlockAsync();
-    };
+      // Subscribe to dimension changes
+      const subscription = Dimensions.addEventListener('change', handleResize);
+      
+      // Clean up the event listener on component unmount
+      return () => {
+        subscription?.remove();
+      };
+    })();
   }, []);
 
   // Function to open the modal
   const openModal = (text, url, extraText = null) => {
-    setModalContent({ text, url }); // Set the content of the modal
-    setModalVisible(true); // Show the modal
-    setExtraText(extraText); // Set the extraText for specific games
+    setModalContent({ text, url });
+    setModalVisible(true);
+    setExtraText(extraText);
   };
 
   // Function to close the modal
   const closeModal = () => {
     setModalVisible(false);
-    setExtraText(null); // Reset extraText when the modal is closed
+    setExtraText(null);
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      {/* Title, Description, and Icon */}
-      <View style={styles.cardContent}>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{item.label}</Text>
-          <Text style={styles.description}>{item.text}</Text>
-        </View>
-        <Image source={item.icon} style={styles.icon} />
-      </View>
-      {/* Play Button */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={() => openModal(item.text, item.url, item.extraText)} // Pass extraText to the modal
-        >
-          <Text style={styles.buttonText}>Play</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
-      {/* Widget Section with Image Background */}
-      <ImageBackground
-        source={require('../../assets/images/banner5.png')}
-        style={[styles.widget, { width }]} // Use dynamic width
-        resizeMode="cover"
-      >
-        <Text style={styles.widgetTitle}></Text>
-        <Text style={styles.widgetSubtitle}></Text>
-      </ImageBackground>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <ImageBackground
+            source={require('../../assets/images/banner5.png')}
+            style={[styles.widget, { width: dimensions.screenWidth * 0.96, height: dimensions.screenHeight * 0.20 }]} // Dynamically use the updated width and height
+            resizeMode="cover"
+          >
+            <Text style={styles.widgetTitle}></Text>
+            <Text style={styles.widgetSubtitle}></Text>
+          </ImageBackground>
 
-      {/* Header Section */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}></Text>
-      </View>
-      
-      {/* Game Options Section */}
-      <FlatList
-        data={games}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={3} // Fixed number of columns
-        columnWrapperStyle={styles.grid} // Custom style for each row
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-      />
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}></Text>
+          </View>
 
-      {/* Instructions Modal */}
-      <Instructions 
-        visible={isModalVisible} 
-        navigation={navigation} 
-        route={{ params: modalContent }} 
-        onClose={closeModal} 
-        extraText={extraText} // Pass extraText prop to Instructions
-      />
+          <FlatList
+            data={games}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <View style={styles.cardContent}>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.title}>{item.label}</Text>
+                    <Text style={styles.description}>{item.text}</Text>
+                  </View>
+                  <Image source={item.icon} style={styles.icon} />
+                </View>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={styles.button} onPress={() => openModal(item.text, item.url, item.extraText)}>
+                    <Text style={styles.buttonText}>Play</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={3}
+            columnWrapperStyle={styles.grid}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
+          />
+
+          <Instructions 
+            visible={isModalVisible} 
+            navigation={navigation} 
+            route={{ params: modalContent }} 
+            onClose={closeModal}
+            extraText={extraText}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
-// Modify your game data configuration for MiniGame6 to include the extra text when opened
+// Your game data
 const games = [
-  { label: "Visual Object Learning Task", text: "Remember each shape shown one at a time.", url: "demo1", icon: require('../../assets/images/icon1.png') },
-  { label: "Abstract Matching", text: "Select the pair of shapes that matches the given shape.", url: "game2", icon: require('../../assets/images/icon1.png') },
-  { label: "Digital Symbol Substitution Task", text: "Match the number to the symbol in the box.", url: "game3", icon: require('../../assets/images/icon1.png') },
-  { label: "Go No Go Test", text: "Tap the screen correctly for different dots.", url: "game4", icon: require('../../assets/images/icon1.png') },
-  { label: "Square Tapping Game", text: "Tap the squares as they appear on the screen.", url: "game5", icon: require('../../assets/images/icon1.png') },
+  { 
+    label: "Visual Object Learning Task", 
+    text: "Remember each shape shown one at a time.", 
+    url: "demo1", 
+    icon: require('../../assets/images/icon1.png'),
+    extraText: "Once you click on the next button, pay close attention to each shape that appears on the screen. Your goal is to remember them. This task will challenge your memory and attention to detail! Ready? Go!"
+  },
+  { label: "Abstract Reasoning", text: "Identify the pair of shapes that follows the given pattern.", url: "game2", icon: require('../../assets/images/icon1.png'), extraText: "Once you click on the next button, you will see a series of patterns and shapes. Pay close attention to each one. This test will challenge your reasoning and ability to detect logical sequences! You will face five questions in total. Ready? Go!" },
+  { 
+    label: "Digital Symbol Substitution Task", 
+    text: "Match the number to the symbol in the box.", 
+    url: "game3", 
+    icon: require('../../assets/images/icon1.png'),
+    extraText: "Match the number to the correct symbol as quickly as possible! This task will test how fast you are. The timer will start when you click on the Next button. Ready? Go!"
+  },
+  { 
+    label: "Go No Go Test", 
+    text: "Tap the screen correctly for different dots.", 
+    url: "game4", 
+    icon: require('../../assets/images/icon1.png'),
+    extraText: "Pay close attention to the dots that appear on the screen. This task tests your focus and quick decision-making. A guide will be shown to you once you click on the next button. Ready? Go!"
+  },  
+  { 
+    label: "Square Tapping Game", 
+    text: "Tap the squares as they appear on the screen.", 
+    url: "game5", 
+    icon: require('../../assets/images/icon1.png'),
+    extraText: "Tap the squares as they appear on the screen and make sure to do it as fast as possible. This task will test your reaction speed! Ready? Go!"
+  },
   { 
     label: "Psychomotor Vigilance Test", 
     text: "React quickly to numbers appearing on screen.", 
     url: "game6", 
     icon: require('../../assets/images/icon1.png'),
-    extraText: "Watch the rectangle. When the numbers appear inside it, tap the button as quickly as you can. The numbers count in milliseconds. Try to get the fastest time without tapping the button too early." // Custom text for MiniGame6
+    extraText: "Watch the rectangle, when numbers appear inside it, tap the button as quickly as you can. The numbers count in milliseconds. Try to get the fastest time without tapping the button too early. Ready? Go!"
   },
 ];
 
+// StyleSheet with dynamic width/height adjustments
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 50,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f4f4f4',
@@ -128,8 +158,6 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
   widget: {
-    height: 170,
-    marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,

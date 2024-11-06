@@ -4,14 +4,28 @@ import { StyleSheet, TouchableOpacity, View, Text, Dimensions } from 'react-nati
 const Game5 = ({ navigation }) => {
     const [squareIndex, setSquareIndex] = useState(0);
     const [score, setScore] = useState(0);
-    const screenWidth = Dimensions.get('window').width;
-    const screenHeight = Dimensions.get('window').height;
+    const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
+    const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
     const initialSquareSize = 105;
     const sizeDecrement = 5;
 
     useEffect(() => {
+        const updateDimensions = () => {
+            setScreenWidth(Dimensions.get('window').width);
+            setScreenHeight(Dimensions.get('window').height);
+        };
+
+        // Add an event listener for orientation changes or window resizing
+        const subscription = Dimensions.addEventListener('change', updateDimensions);
+
+        return () => {
+            // Clean up the event listener when the component unmounts
+            subscription.remove();
+        };
+    }, []);
+
+    useEffect(() => {
         let interval;
-        let size = initialSquareSize;
 
         const showSquare = () => {
             if (squareIndex >= 9) {
@@ -27,21 +41,29 @@ const Game5 = ({ navigation }) => {
             setSquareIndex(prevIndex => prevIndex + 1);
         };
 
-
-
         interval = setInterval(showSquare, 1000);
 
         return () => clearInterval(interval);
-    }, [squareIndex]);
+    }, [squareIndex, screenWidth, screenHeight]);
 
     const [squares, setSquares] = useState([]);
 
-
-    const handleSquarePress = (indexToRemove) => {
-        setSquares(prevSquares => prevSquares.filter((_, index) => index !== indexToRemove));
+    const handleSquarePress = () => {
+        setSquares([]);
         setScore(prevScore => prevScore + 50);
     };
 
+    const getScoreMessage = () => {
+        if (score === 400) {
+            return 'Excellent work!';
+        } else if (score >= 300) {
+            return 'Great job!';
+        } else if (score >= 200) {
+            return 'Good effort!';
+        } else {
+            return 'Keep practicing!';
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -53,15 +75,15 @@ const Game5 = ({ navigation }) => {
                 />
             ))}
             {squareIndex >= 9 && (
-                <View style={styles.scoreContainer}>
-                    <Text style={styles.score}>Your Score: {score}</Text>
+                <View style={[styles.scoreContainer, { width: screenWidth * 0.6, height: screenHeight * 0.6 }]}>
+                    <Text style={styles.score}>Your Score: {score}/400</Text>
+                    <Text style={styles.scoreMessage}>{getScoreMessage()}</Text>
                     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('landing')}>
                         <Text style={styles.buttonText}>Home Page</Text>
                     </TouchableOpacity>
                 </View>
             )}
         </View>
-
     );
 };
 
@@ -70,32 +92,49 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#f0f0f0',
     },
     square: {
         position: 'absolute',
-        backgroundColor: 'blue',
+        backgroundColor: '#1e90ff',
+        borderRadius: 10,
     },
     scoreContainer: {
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: [{ translateX: -50 }, { translateY: -50 }],
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 5,
+        elevation: 5,
+        padding: 20, // Padding to improve spacing
     },
     score: {
-        fontSize: 32,
+        fontSize: 24,  // Smaller text size
         fontWeight: 'bold',
+        color: '#333',
         marginBottom: 20,
+        textAlign: 'center',
+    },
+    scoreMessage: {
+        fontSize: 20,  // Smaller text size
+        color: '#555',
+        fontWeight: 'bold',
+        marginBottom: 30,
+        textAlign: 'center',
     },
     button: {
-        backgroundColor: 'blue',
-        padding: 15,
+        backgroundColor: '#0047AB',
+        paddingVertical: 12,  // Smaller padding
+        paddingHorizontal: 30,  // Smaller padding
         borderRadius: 10,
     },
     buttonText: {
-        color: 'white',
-        fontSize: 20,
+        color: '#fff',
+        fontSize: 16,  // Smaller text size
+        fontWeight: 'bold',
     },
 });
 

@@ -13,6 +13,8 @@ import DemoGame1 from './src/pages/DemoGame1';
 import MiniGame5 from './src/pages/MiniGame5';
 import MiniGame6 from './src/pages/MiniGame6';
 import MiniGame4Right from './src/pages/MiniGame4Right';
+import IrisDetection from './src/pages/IrisDetection';  // Adjust the path as needed
+
 
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
         <Stack.Screen name="game4" component={MiniGame4} options={{ headerShown: false }} />
         <Stack.Screen name="game2" component={MiniGame2} options={{ headerShown: false }} />
         <Stack.Screen name="game1" component={MiniGame1} options={{ headerShown: false }} />
+        <Stack.Screen name="IrisDetection" component={IrisDetection} options={{ headerShown: false }} />
 
         <Stack.Screen name="game6" component={MiniGame6} options={{ headerShown: false }} />
         <Stack.Screen name="intruction" component={Instructions} options={{ headerShown: false }} />
